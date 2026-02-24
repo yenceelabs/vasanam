@@ -43,12 +43,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!result) return { title: "Actor not found" };
 
   const { actorName, movies } = result;
+  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://vasanam.vercel.app";
+  const ogImage = `${BASE_URL}/api/og?title=${encodeURIComponent(actorName)}&subtitle=${encodeURIComponent(`${movies.length} Movies · Tamil Movie Dialogues`)}`;
+
   return {
     title: `${actorName} Dialogues — Famous lines and scenes`,
     description: `Search all ${actorName} dialogues from ${movies.length} movies. Find famous lines, watch exact YouTube scenes. Best ${actorName} dialogues on Vasanam.`,
     openGraph: {
       title: `${actorName} Dialogues`,
       description: `Find any ${actorName} dialogue and watch the exact scene`,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: `${actorName} Dialogues` }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${actorName} Dialogues — Famous lines and scenes`,
+      description: `Search all ${actorName} dialogues from ${movies.length} movies`,
+      images: [ogImage],
     },
   };
 }

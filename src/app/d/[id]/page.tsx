@@ -3,13 +3,11 @@ import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase";
 import {
   getYouTubeEmbedUrl,
-  getYouTubeThumbnail,
   formatTimestamp,
   getWhatsAppShareText,
   getSceneShareUrl,
 } from "@/lib/search";
 import Link from "next/link";
-import Image from "next/image";
 import ShareButtons from "@/components/ShareButtons";
 import SearchBox from "@/components/SearchBox";
 
@@ -53,7 +51,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const movie = scene.movie as { title: string; year: number; youtube_video_id: string; poster_url: string | null } | null;
   const title = `"${scene.text.slice(0, 60)}${scene.text.length > 60 ? "..." : ""}" — ${movie?.title || ""}`;
   const description = `Watch this scene from ${movie?.title} (${movie?.year}) at ${formatTimestamp(scene.start_ms)} on YouTube. Find Tamil movie dialogues instantly on Vasanam.`;
-  const ogImage = movie ? getYouTubeThumbnail(movie.youtube_video_id) : undefined;
+  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://vasanam.vercel.app";
+  const ogImage = `${BASE_URL}/api/og/scene/${id}`;
 
   return {
     title,
@@ -61,14 +60,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      images: ogImage ? [{ url: ogImage }] : [],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
       type: "video.other",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ogImage ? [ogImage] : [],
+      images: [ogImage],
     },
   };
 }
