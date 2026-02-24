@@ -1,4 +1,4 @@
-import { supabase, SearchResult } from "./supabase";
+import { getSupabase, SearchResult } from "./supabase";
 
 export async function searchDialogues(
   query: string,
@@ -9,7 +9,7 @@ export async function searchDialogues(
 
   // Postgres full-text search across Tamil + Tanglish + English segments
   // Uses simple dictionary (language-agnostic) for Tamil/Tanglish support
-  const { data, error, count } = await supabase.rpc("search_dialogues", {
+  const { data, error, count } = await getSupabase().rpc("search_dialogues", {
     search_query: query.trim(),
     result_limit: limit,
     result_offset: offset,
@@ -40,7 +40,7 @@ export function getYouTubeThumbnail(videoId: string): string {
 
 export function getSceneShareUrl(segmentId: string): string {
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://vasanam.in";
+    process.env.NEXT_PUBLIC_APP_URL || "https://vasanam.vercel.app";
   return `${baseUrl}/d/${segmentId}`;
 }
 

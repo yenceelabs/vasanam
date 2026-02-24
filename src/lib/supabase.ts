@@ -1,15 +1,31 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+function requireEnv(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Missing required env var: ${key}`);
+  }
+  return value;
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Lazy singleton — only initializes when first accessed at runtime
+let _anonClient: SupabaseClient | null = null;
 
-// Server-side client with service role (for admin operations)
-export function createServiceClient() {
+export function getSupabase(): SupabaseClient {
+  if (!_anonClient) {
+    _anonClient = createClient(
+      requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+      requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    );
+  }
+  return _anonClient;
+}
+
+// Server-side client with service role (for admin operations like search, sitemap)
+export function createServiceClient(): SupabaseClient {
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_KEY!
+    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    requireEnv("SUPABASE_SERVICE_KEY")
   );
 }
 

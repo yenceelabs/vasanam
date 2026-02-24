@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Vasanam — Search Tamil Movie Dialogues",
     description: "Type any dialogue. Watch the exact scene.",
-    images: [{ url: "/og-home.jpg", width: 1200, height: 630 }],
+    images: [{ url: "/api/og?title=%E0%AE%B5%E0%AE%9A%E0%AE%A9%E0%AE%AE%E0%AF%8D&subtitle=Search+Tamil+Movie+Dialogues", width: 1200, height: 630 }],
   },
 };
 

@@ -1,16 +1,24 @@
 import { MetadataRoute } from "next";
-import { createServiceClient } from "@/lib/supabase";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://vasanam.in";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://vasanam.vercel.app";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createServiceClient();
+  let movies: Array<{ title: string; year: number; created_at: string }> | null = null;
 
-  // Get all movies
-  const { data: movies } = await supabase
-    .from("vasanam_movies")
-    .select("title, year, created_at")
-    .order("year", { ascending: false });
+  // Only query Supabase if env vars are available (skips during build without env)
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+    try {
+      const { createServiceClient } = await import("@/lib/supabase");
+      const supabase = createServiceClient();
+      const result = await supabase
+        .from("vasanam_movies")
+        .select("title, year, created_at")
+        .order("year", { ascending: false });
+      movies = result.data;
+    } catch {
+      // Supabase not available at build time — skip dynamic entries
+    }
+  }
 
   const movieUrls: MetadataRoute.Sitemap = (movies || []).map((movie) => ({
     url: `${BASE_URL}/movie/${movie.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${movie.year}`,
