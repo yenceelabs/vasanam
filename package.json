@@ -10,11 +10,10 @@
     "ingest": "npx ts-node --project tsconfig.scripts.json scripts/ingest-transcripts.ts"
   },
   "dependencies": {
-    "next": "15.3.2",
+    "next": "16.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@supabase/supabase-js": "^2.48.1",
-    "@clerk/nextjs": "^6.9.2",
     "posthog-js": "^1.201.0",
     "youtube-transcript": "^1.2.1",
     "clsx": "^2.1.1",
