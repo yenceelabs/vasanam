@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { createServiceClient } from "@/lib/supabase";
+import { checkRateLimit } from "@/lib/rate-limit";
 import SearchBox from "@/components/SearchBox";
 import SearchResults from "@/components/SearchResults";
 import Link from "next/link";
@@ -21,7 +23,15 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 }
 
 async function getSearchResults(query: string, page: number) {
-  if (!query.trim()) return { results: [], total: 0 };
+  if (!query.trim()) return { results: [], total: 0, rateLimited: false };
+
+  // Rate limit server-rendered search (same protection as /api/search)
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous";
+
+  if (!checkRateLimit(`page:${ip}`)) {
+    return { results: [], total: 0, rateLimited: true };
+  }
 
   const supabase = createServiceClient();
   const limit = 20;
@@ -35,10 +45,10 @@ async function getSearchResults(query: string, page: number) {
 
   if (error) {
     console.error("Search error:", error);
-    return { results: [], total: 0 };
+    return { results: [], total: 0, rateLimited: false };
   }
 
-  return { results: data || [], total: data?.length || 0 };
+  return { results: data || [], total: data?.length || 0, rateLimited: false };
 }
 
 export default async function SearchPage({ searchParams }: Props) {
@@ -46,7 +56,7 @@ export default async function SearchPage({ searchParams }: Props) {
   const query = params.q || "";
   const page = parseInt(params.page || "1");
 
-  const { results, total } = await getSearchResults(query, page);
+  const { results, total, rateLimited } = await getSearchResults(query, page);
 
   return (
     <main className="min-h-screen">
@@ -67,7 +77,14 @@ export default async function SearchPage({ searchParams }: Props) {
 
       {/* Results */}
       <div className="max-w-3xl mx-auto px-4 py-6">
-        {query ? (
+        {rateLimited ? (
+          <div className="text-center py-16">
+            <p className="text-[#E63946] text-lg mb-2">Too many requests</p>
+            <p className="text-gray-500 text-sm">
+              Please slow down and try again in a minute.
+            </p>
+          </div>
+        ) : query ? (
           <>
             <p className="text-sm text-gray-500 mb-6">
               {results.length > 0
