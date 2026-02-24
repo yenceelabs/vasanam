@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-export const runtime = "edge";
+// Node.js runtime (NOT edge) — required for in-memory rate limiter to persist
+// across requests on the same warm instance. Edge isolates get fresh memory per
+// request, completely bypassing the Map-based rate limit.
 
 export async function GET(request: NextRequest) {
   // Rate limiting
