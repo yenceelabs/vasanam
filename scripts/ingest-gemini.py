@@ -262,7 +262,7 @@ def transcribe_with_gemini(audio_path: str, api_key: str) -> list[dict]:
             ],
             config=genai_types.GenerateContentConfig(
                 temperature=0.1,   # Low temp for accurate transcription
-                max_output_tokens=8192,
+                max_output_tokens=32768,  # Long compilations need more tokens
             )
         )
         
