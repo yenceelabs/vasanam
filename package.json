@@ -10,7 +10,7 @@
     "ingest": "npx ts-node --project tsconfig.scripts.json scripts/ingest-transcripts.ts"
   },
   "dependencies": {
-    "next": "15.1.7",
+    "next": "15.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@supabase/supabase-js": "^2.48.1",
