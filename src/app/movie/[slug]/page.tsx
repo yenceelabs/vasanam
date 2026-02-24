@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase";
 import { formatTimestamp } from "@/lib/search";
+import { parseSlug } from "@/lib/slug";
 import SearchBox from "@/components/SearchBox";
 import Link from "next/link";
 
@@ -11,17 +12,26 @@ interface Props {
 
 async function getMovieBySlug(slug: string) {
   const supabase = createServiceClient();
-  // slug format: "baasha-1995" — extract year from end
-  const parts = slug.split("-");
-  const year = parseInt(parts[parts.length - 1]);
-  const titlePart = parts.slice(0, -1).join(" ");
+
+  // First try exact slug match (when DB has a `slug` column)
+  const { data: exactMatch } = await supabase
+    .from("vasanam_movies")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (exactMatch) return exactMatch;
+
+  // Fallback: parse slug into title pattern + year for ILIKE match
+  const parsed = parseSlug(slug);
+  if (!parsed) return null;
 
   const { data } = await supabase
     .from("vasanam_movies")
     .select("*")
-    .ilike("title", titlePart.replace(/-/g, "%"))
-    .eq("year", year)
-    .single();
+    .ilike("title", parsed.titlePattern)
+    .eq("year", parsed.year)
+    .maybeSingle(); // use maybeSingle — no error on 0 or null results
 
   return data;
 }
