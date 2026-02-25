@@ -16,7 +16,7 @@ export async function searchDialogues(
   });
 
   if (error) {
-    console.error("Search error:", error);
+    console.error("Search error:", error instanceof Error ? error.message : String(error));
     return { results: [], total: 0 };
   }
 
@@ -40,7 +40,7 @@ export function getYouTubeThumbnail(videoId: string): string {
 
 export function getSceneShareUrl(segmentId: string): string {
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://vasanam.vercel.app";
+    process.env.NEXT_PUBLIC_APP_URL || "https://vasanam.in";
   return `${baseUrl}/d/${segmentId}`;
 }
 
