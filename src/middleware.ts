@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const CANONICAL_DOMAIN = "vasanam.in";
+// TODO: Update to "vasanam.in" once domain is registered and DNS configured
+const CANONICAL_DOMAIN = process.env.CANONICAL_DOMAIN || "";
 
 /**
  * Redirect non-canonical domains (e.g. vasanam.vercel.app) to vasanam.in.
@@ -9,8 +10,9 @@ const CANONICAL_DOMAIN = "vasanam.in";
 export function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") || "";
 
-  // Allow canonical domain and localhost (dev) through
+  // If no canonical domain configured, or already on canonical, pass through
   if (
+    !CANONICAL_DOMAIN ||
     hostname === CANONICAL_DOMAIN ||
     hostname.startsWith("www." + CANONICAL_DOMAIN) ||
     hostname.startsWith("localhost") ||
